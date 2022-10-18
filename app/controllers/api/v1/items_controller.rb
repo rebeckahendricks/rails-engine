@@ -12,6 +12,14 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(Item.create(item_params)), status: 201
   end
 
+  def update
+    if Merchant.good_id?(item_params[:merchant_id])
+      render json: ItemSerializer.new(Item.update(params[:id], item_params))
+    else
+      render status: 400
+    end
+  end
+
   private
 
   def item_params
