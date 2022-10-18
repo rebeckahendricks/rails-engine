@@ -71,12 +71,12 @@ describe 'Items API' do
   it 'can create a new item' do
     merchant = create(:merchant)
 
-    item_params = ({
+    item_params = {
       merchant_id: merchant.id,
       name: Faker::Lorem.word,
       description: Faker::Lorem.sentence,
       unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    })
+    }
 
     headers = { 'CONTENT_TYPE' => 'application/json' }
 
@@ -89,5 +89,30 @@ describe 'Items API' do
     expect(created_item.name).to eq(item_params[:name])
     expect(created_item.description).to eq(item_params[:description])
     expect(created_item.unit_price).to eq(item_params[:unit_price])
+  end
+
+  it 'can update an existing item' do
+    merchant = create(:merchant)
+
+    item = Item.create!(
+      merchant_id: merchant.id,
+      name: Faker::Lorem.word,
+      description: Faker::Lorem.sentence,
+      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+    )
+
+    previous_name = item.name
+    item_params = {
+      name: 'Fork'
+    }
+    headers = { 'CONTENT_TYPE' => 'application/json' }
+
+    patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate({ item: item_params })
+
+    item = Item.find_by(id: item.id)
+
+    expect(response).to be_successful
+    expect(item.name).to_not eq(previous_name)
+    expect(item.name).to eq('Fork')
   end
 end
