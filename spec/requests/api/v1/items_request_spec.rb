@@ -71,70 +71,222 @@ describe 'Items API' do
     expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
   end
 
-  it 'can create a new item' do
-    merchant = create(:merchant)
+  describe 'happy path' do
+    it 'can create a new item' do
+      merchant = create(:merchant)
 
-    item_params = {
-      merchant_id: merchant.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    }
+      item_params = {
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      }
 
-    headers = { 'CONTENT_TYPE' => 'application/json' }
+      headers = { 'CONTENT_TYPE' => 'application/json' }
 
-    post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
+      post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
 
-    created_item = Item.last
+      created_item = Item.last
 
-    expect(response).to be_successful
-    expect(created_item.merchant_id).to eq(item_params[:merchant_id])
-    expect(created_item.name).to eq(item_params[:name])
-    expect(created_item.description).to eq(item_params[:description])
-    expect(created_item.unit_price).to eq(item_params[:unit_price])
+      expect(response).to be_successful
+      expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+      expect(created_item.name).to eq(item_params[:name])
+      expect(created_item.description).to eq(item_params[:description])
+      expect(created_item.unit_price).to eq(item_params[:unit_price])
+    end
   end
 
-  it 'can update an existing item' do
-    merchant = create(:merchant)
+  describe 'sad path' do
+    it 'returns an error if any attributes are missing when creating an item' do
+      merchant = create(:merchant)
 
-    item = Item.create!(
-      merchant_id: merchant.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    )
+      item_params = {
+        merchant_id: merchant.id,
+        name: "",
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      }
 
-    previous_name = item.name
-    item_params = {
-      name: 'Fork'
-    }
-    headers = { 'CONTENT_TYPE' => 'application/json' }
+      headers = { 'CONTENT_TYPE' => 'application/json' }
 
-    patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate({ item: item_params })
+      post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
 
-    item = Item.find_by(id: item.id)
+      expect(response).to have_http_status(400)
+      expect(Item.count).to eq(0)
+    end
 
-    expect(response).to be_successful
-    expect(item.name).to_not eq(previous_name)
-    expect(item.name).to eq('Fork')
+    it 'returns an error if any attributes are incorrect when creating an item' do
+      merchant = create(:merchant)
+
+      item_params = {
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: 'Hello'
+      }
+
+      headers = { 'CONTENT_TYPE' => 'application/json' }
+
+      post '/api/v1/items', headers: headers, params: JSON.generate(item: item_params)
+
+      expect(response).to have_http_status(400)
+      expect(Item.count).to eq(0)
+    end
   end
 
-  it 'can destroy an item' do
-    merchant = create(:merchant)
+  describe 'happy path' do
+    it 'can update an existing item' do
+      merchant = create(:merchant)
 
-    item = Item.create!(
-      merchant_id: merchant.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    )
+      item = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
 
-    expect(Item.count).to eq(1)
+      previous_name = item.name
+      item_params = {
+        name: 'Fork'
+      }
+      headers = { 'CONTENT_TYPE' => 'application/json' }
 
-    delete "/api/v1/items/#{item.id}"
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate({ item: item_params })
 
-    expect(response).to be_successful
-    expect(Item.count).to eq(0)
-    expect{ Item.find(item.id) }.to raise_error(ActiveRecord::RecordNotFound)
+      item = Item.find_by(id: item.id)
+
+      expect(response).to be_successful
+      expect(item.name).to_not eq(previous_name)
+      expect(item.name).to eq('Fork')
+    end
+  end
+
+  describe 'sad path' do
+    it 'only updates an existing item if attributes are valid' do
+      merchant = create(:merchant)
+
+      item = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
+
+      previous_unit_price = item.unit_price
+      item_params = {
+        unit_price: 'Hello'
+      }
+      headers = { 'CONTENT_TYPE' => 'application/json' }
+
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate({ item: item_params })
+
+      item = Item.find_by(id: item.id)
+
+      expect(item.unit_price).to eq(previous_unit_price)
+      expect(item.unit_price).to_not eq('Hello')
+    end
+
+    it 'only updates an existing item if the merchant id exists' do
+      merchant = create(:merchant)
+
+      item = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
+
+      previous_unit_price = item.unit_price
+      item_params = {
+        merchant_id: 'Hello'
+      }
+      headers = { 'CONTENT_TYPE' => 'application/json' }
+
+      patch "/api/v1/items/#{item.id}", headers: headers, params: JSON.generate({ item: item_params })
+
+      item = Item.find_by(id: item.id)
+
+      expect(response).to have_http_status(400)
+      expect(item.unit_price).to eq(previous_unit_price)
+      expect(item.unit_price).to_not eq('Hello')
+    end
+  end
+
+  describe 'destroy' do
+    it 'can destroy an item' do
+      merchant = create(:merchant)
+
+      item = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
+
+      expect(Item.count).to eq(1)
+
+      delete "/api/v1/items/#{item.id}"
+
+      expect(response).to be_successful
+      expect(Item.count).to eq(0)
+      expect { Item.find(item.id) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it 'destroys any invoice if this was the only item on an invoice' do
+      merchant = create(:merchant)
+
+      item1 = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
+
+      item2 = Item.create!(
+        merchant_id: merchant.id,
+        name: Faker::Lorem.word,
+        description: Faker::Lorem.sentence,
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
+      )
+
+      customer = create(:customer)
+
+      invoice = Invoice.create!(
+        customer_id: customer.id,
+        status: ['In Progress', 'Completed', 'Cancelled'].sample,
+        merchant_id: merchant.id,
+      )
+
+      InvoiceItem.create!(
+        item_id: item1.id,
+        invoice_id: invoice.id,
+        quantity: Faker::Number.within(range: 1..100),
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
+      )
+
+      InvoiceItem.create!(
+        item_id: item2.id,
+        invoice_id: invoice.id,
+        quantity: Faker::Number.within(range: 1..100),
+        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
+      )
+
+      expect(Invoice.count).to eq(1)
+      expect(Invoice.first.items.count).to eq(2)
+      expect(Item.count).to eq(2)
+      expect(InvoiceItem.count).to eq(2)
+
+      delete "/api/v1/items/#{item1.id}"
+
+      expect(Invoice.count).to eq(1)
+      expect(Item.count).to eq(1)
+      expect(InvoiceItem.count).to eq(1)
+
+      delete "/api/v1/items/#{item2.id}"
+
+      expect(Invoice.count).to eq(0)
+      expect(Item.count).to eq(0)
+      expect(InvoiceItem.count).to eq(0)
+    end
   end
 end
