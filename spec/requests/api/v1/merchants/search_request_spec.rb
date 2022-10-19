@@ -22,4 +22,22 @@ describe 'Merchants::Search API' do
       expect(merchant[:data][:attributes][:name]).to eq(merchant1.name)
     end
   end
+
+  describe 'sad path' do
+    it 'returns an empty object with "data" if no results match' do
+      create(:merchant, name: 'Walmart')
+      create(:merchant, name: 'Dogmart')
+      create(:merchant, name: 'Bobs Baskets')
+
+      search = 'abcdefghijklmnop'
+
+      get "/api/v1/merchants/find?name=#{search}"
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to be_successful
+      expect(merchant[:data]).to be_a(Hash)
+      expect(merchant[:data].count).to eq(0)
+    end
+  end
 end

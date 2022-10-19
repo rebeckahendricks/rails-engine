@@ -2,5 +2,9 @@ class MerchantSerializer
   include JSONAPI::Serializer
   attributes :name
 
-  # has_many :items
+  def self.no_search_results
+    {
+      "data": {}
+    }
+  end
 end
