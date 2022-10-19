@@ -13,4 +13,9 @@ class Item < ApplicationRecord
       invoice_item.destroy
     end
   end
+
+  def self.search_by_name(search_params)
+    where('name ILIKE ? OR description ILIKE ?', "%#{search_params}%", "%#{search_params}%")
+      .order(:name)
+  end
 end
