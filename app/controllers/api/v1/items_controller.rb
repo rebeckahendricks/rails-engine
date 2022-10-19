@@ -26,9 +26,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     item = Item.find(params[:id])
-    item.invoice_items.each do |invoice_item|
-      invoice_item.destroy
-    end
+    item.destroy_invoice_items
     Item.delete(item)
   end
 

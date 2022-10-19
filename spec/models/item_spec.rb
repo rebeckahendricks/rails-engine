@@ -13,4 +13,47 @@ RSpec.describe Item, type: :model do
     it { should validate_presence_of(:unit_price) }
     it { should validate_presence_of(:merchant_id) }
   end
+
+  describe '#instance methods' do
+    describe '#destroy_invoice_items' do
+      it 'can destroy an items invoice_items' do
+        merchant = create(:merchant)
+        item1 = create(:item, merchant_id: merchant.id)
+        item2 = create(:item, merchant_id: merchant.id)
+        customer1 = create(:customer)
+        customer2 = create(:customer)
+        invoice1 = create(:invoice, customer_id: customer1.id, merchant_id: merchant.id)
+        invoice2 = create(:invoice, customer_id: customer2.id, merchant_id: merchant.id)
+
+        InvoiceItem.create!(
+          item_id: item1.id,
+          invoice_id: invoice1.id,
+          quantity: Faker::Number.within(range: 1..100),
+          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
+        )
+
+        InvoiceItem.create!(
+          item_id: item1.id,
+          invoice_id: invoice2.id,
+          quantity: Faker::Number.within(range: 1..100),
+          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
+        )
+
+        InvoiceItem.create!(
+          item_id: item2.id,
+          invoice_id: invoice2.id,
+          quantity: Faker::Number.within(range: 1..100),
+          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
+        )
+
+        expect(item1.invoice_items.count).to eq(2)
+        expect(item2.invoice_items.count).to eq(1)
+
+        item1.destroy_invoice_items
+
+        expect(item1.invoice_items.count).to eq(0)
+        expect(item2.invoice_items.count).to eq(1)
+      end
+    end
+  end
 end
