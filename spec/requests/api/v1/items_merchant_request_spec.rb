@@ -6,19 +6,8 @@ describe 'ItemsMerchant API' do
     merchant1 = Merchant.first
     merchant2 = Merchant.last
 
-    item1 = Item.create!(
-      merchant_id: merchant1.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    )
-
-    Item.create!(
-      merchant_id: merchant2.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    )
+    item1 = create(:item, merchant_id: merchant1.id)
+    create(:item, merchant_id: merchant2.id)
 
     get "/api/v1/items/#{item1.id}/merchant"
 
