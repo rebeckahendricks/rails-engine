@@ -18,4 +18,9 @@ class Item < ApplicationRecord
     where('name ILIKE ? OR description ILIKE ?', "%#{search_params}%", "%#{search_params}%")
       .order(:name)
   end
+
+  def self.search_by_price(min_price = 0, max_price = Float::INFINITY)
+    where('unit_price >= ? and unit_price <= ?', min_price, max_price)
+      .order(:name)
+  end
 end

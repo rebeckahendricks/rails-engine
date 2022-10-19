@@ -24,6 +24,21 @@ RSpec.describe Item, type: :model do
 
         expect(Item.search_by_name('ring')).to eq([item2, item1])
       end
+
+      it 'can return (alphabetically) all items within a minimum and/or maximum unit_price range' do
+        merchant = create(:merchant)
+        item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+        item2 = create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+        item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
+        item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
+
+        min_price = 50
+        max_price = 150
+
+        expect(Item.search_by_price(min_price)).to eq([item4, item2])
+        expect(Item.search_by_price(0, max_price)).to eq([item3, item1, item2])
+        expect(Item.search_by_price(min_price, max_price)).to eq([item2])
+      end
     end
   end
 
