@@ -11,12 +11,10 @@ class InvoiceItem < ApplicationRecord
   after_destroy :destroy_orphaned_invoice
 
   def find_invoice
-    @invoice = self.invoice
+    @invoice = invoice
   end
 
   def destroy_orphaned_invoice
-    if @invoice.invoice_items.length == 0
-      @invoice.destroy
-    end
+    @invoice.destroy if @invoice.invoice_items.length.zero?
   end
 end
