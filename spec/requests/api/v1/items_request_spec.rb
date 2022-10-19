@@ -5,12 +5,7 @@ describe 'Items API' do
     merchant = create(:merchant)
 
     3.times do
-      Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      create(:item, merchant_id: merchant.id)
     end
 
     get '/api/v1/items'
@@ -42,12 +37,7 @@ describe 'Items API' do
   it 'can get one item by its id' do
     merchant = create(:merchant)
 
-    item = Item.create!(
-      merchant_id: merchant.id,
-      name: Faker::Lorem.word,
-      description: Faker::Lorem.sentence,
-      unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-    )
+    item = create(:item, merchant_id: merchant.id)
 
     get "/api/v1/items/#{item.id}"
 
@@ -138,12 +128,7 @@ describe 'Items API' do
     it 'can update an existing item' do
       merchant = create(:merchant)
 
-      item = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item = create(:item, merchant_id: merchant.id)
 
       previous_name = item.name
       item_params = {
@@ -165,12 +150,7 @@ describe 'Items API' do
     it 'only updates an existing item if attributes are valid' do
       merchant = create(:merchant)
 
-      item = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item = create(:item, merchant_id: merchant.id)
 
       previous_unit_price = item.unit_price
       item_params = {
@@ -189,12 +169,7 @@ describe 'Items API' do
     it 'only updates an existing item if the merchant id exists' do
       merchant = create(:merchant)
 
-      item = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item = create(:item, merchant_id: merchant.id)
 
       previous_unit_price = item.unit_price
       item_params = {
@@ -216,12 +191,7 @@ describe 'Items API' do
     it 'can destroy an item' do
       merchant = create(:merchant)
 
-      item = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item = create(:item, merchant_id: merchant.id)
 
       expect(Item.count).to eq(1)
 
@@ -235,27 +205,13 @@ describe 'Items API' do
     it 'destroys any invoice if this was the only item on an invoice' do
       merchant = create(:merchant)
 
-      item1 = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item1 = create(:item, merchant_id: merchant.id)
 
-      item2 = Item.create!(
-        merchant_id: merchant.id,
-        name: Faker::Lorem.word,
-        description: Faker::Lorem.sentence,
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2)
-      )
+      item2 = create(:item, merchant_id: merchant.id)
 
       customer = create(:customer)
 
-      invoice = Invoice.create!(
-        customer_id: customer.id,
-        status: ['In Progress', 'Completed', 'Cancelled'].sample,
-        merchant_id: merchant.id,
-      )
+      invoice = create(:invoice, customer_id: customer.id, merchant_id: merchant.id)
 
       InvoiceItem.create!(
         item_id: item1.id,
