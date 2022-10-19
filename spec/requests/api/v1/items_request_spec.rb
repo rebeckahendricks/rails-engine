@@ -36,7 +36,6 @@ describe 'Items API' do
 
   it 'can get one item by its id' do
     merchant = create(:merchant)
-
     item = create(:item, merchant_id: merchant.id)
 
     get "/api/v1/items/#{item.id}"
@@ -127,7 +126,6 @@ describe 'Items API' do
   describe 'happy path' do
     it 'can update an existing item' do
       merchant = create(:merchant)
-
       item = create(:item, merchant_id: merchant.id)
 
       previous_name = item.name
@@ -149,7 +147,6 @@ describe 'Items API' do
   describe 'sad path' do
     it 'only updates an existing item if attributes are valid' do
       merchant = create(:merchant)
-
       item = create(:item, merchant_id: merchant.id)
 
       previous_unit_price = item.unit_price
@@ -168,7 +165,6 @@ describe 'Items API' do
 
     it 'only updates an existing item if the merchant id exists' do
       merchant = create(:merchant)
-
       item = create(:item, merchant_id: merchant.id)
 
       previous_unit_price = item.unit_price
@@ -190,7 +186,6 @@ describe 'Items API' do
   describe 'destroy' do
     it 'can destroy an item' do
       merchant = create(:merchant)
-
       item = create(:item, merchant_id: merchant.id)
 
       expect(Item.count).to eq(1)
@@ -204,13 +199,9 @@ describe 'Items API' do
 
     it 'destroys any invoice if this was the only item on an invoice' do
       merchant = create(:merchant)
-
       item1 = create(:item, merchant_id: merchant.id)
-
       item2 = create(:item, merchant_id: merchant.id)
-
       customer = create(:customer)
-
       invoice = create(:invoice, customer_id: customer.id, merchant_id: merchant.id)
 
       InvoiceItem.create!(
