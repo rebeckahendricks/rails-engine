@@ -10,4 +10,11 @@ class Merchant < ApplicationRecord
   def self.good_id?(merchant_id)
     merchant_id.nil? || where(id: merchant_id).any?
   end
+
+  def self.search_by_name(search_params)
+    where('name ILIKE ?', "%#{search_params}%")
+      .order(:name)
+      .limit(1)
+      .first
+  end
 end

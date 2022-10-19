@@ -14,11 +14,25 @@ RSpec.describe Merchant, type: :model do
   end
 
   describe 'class methods' do
-    it 'can determine if a merchant id is good' do
-      merchant_id = create(:merchant).id
+    describe '.good_id?' do
+      it 'can determine if a merchant id is good' do
+        merchant_id = create(:merchant).id
 
-      expect(Merchant.good_id?(merchant_id)).to be(true)
-      expect(Merchant.good_id?(5)).to be(false)
+        expect(Merchant.good_id?(merchant_id)).to be(true)
+        expect(Merchant.good_id?(5)).to be(false)
+      end
+    end
+
+    describe '.search_by_name(search_params)' do
+      it 'can search for a merchant by name' do
+        create(:merchant, name: 'Walmart')
+        merchant1 = create(:merchant, name: 'Dogmart')
+        create(:merchant, name: 'Bobs Baskets')
+
+        search_params = 'Mart'
+
+        expect(Merchant.search_by_name(search_params)).to eq(merchant1)
+      end
     end
   end
 end
