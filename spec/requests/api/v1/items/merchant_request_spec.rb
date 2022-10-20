@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe 'ItemsMerchant API' do
+describe 'Items::Merchant API' do
   it 'can get one merchant by its items' do
     create_list(:merchant, 2)
     merchant1 = Merchant.first
