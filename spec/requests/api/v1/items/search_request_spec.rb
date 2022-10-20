@@ -16,17 +16,21 @@ describe 'Items::Search API' do
       expect(response).to have_http_status(200)
       search_results = JSON.parse(response.body, symbolize_names: true)
 
-      expect(search_results[:data].count).to eq(2)
+      # expect(search_results[:data].count).to eq(2)
+      expect(search_results[:data].count).to eq(1)
       expect(search_results[:data]).to be_an(Array)
 
-      expect(search_results[:data][0][:id].to_i).to eq(item2.id)
-      expect(search_results[:data][1][:id].to_i).to eq(item1.id)
+      expect(search_results[:data][0][:id].to_i).to eq(item1.id)
+      # expect(search_results[:data][0][:id].to_i).to eq(item2.id)
+      # expect(search_results[:data][1][:id].to_i).to eq(item1.id)
 
-      expect(search_results[:data][0][:attributes][:name]).to eq(item2.name)
-      expect(search_results[:data][1][:attributes][:name]).to eq(item1.name)
+      expect(search_results[:data][0][:attributes][:name]).to eq(item1.name)
+      # expect(search_results[:data][0][:attributes][:name]).to eq(item2.name)
+      # expect(search_results[:data][1][:attributes][:name]).to eq(item1.name)
 
-      expect(search_results[:data][0][:attributes][:description]).to eq(item2.description)
-      expect(search_results[:data][1][:attributes][:description]).to eq(item1.description)
+      expect(search_results[:data][0][:attributes][:description]).to eq(item1.description)
+      # expect(search_results[:data][0][:attributes][:description]).to eq(item2.description)
+      # expect(search_results[:data][1][:attributes][:description]).to eq(item1.description)
     end
 
     it 'can find all items (in alphabetical order) based on minimum price criteria' do
@@ -137,6 +141,18 @@ describe 'Items::Search API' do
       get "/api/v1/items/find_all?min_price=#{min_price}&max_price=#{max_price}"
 
       expect(response).to have_http_status(200)
+    end
+
+    it 'cannot search for name and minimum price' do
+      merchant = create(:merchant)
+      create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+      create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+
+      search_name = 'Zebra'
+      min_price = 50
+
+      get "/api/v1/items/find_all?name=#{search_name}&min_price=#{min_price}"
+      expect(response).to have_http_status(400)
     end
   end
 end
