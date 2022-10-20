@@ -204,19 +204,8 @@ describe 'Items API' do
       customer = create(:customer)
       invoice = create(:invoice, customer_id: customer.id, merchant_id: merchant.id)
 
-      InvoiceItem.create!(
-        item_id: item1.id,
-        invoice_id: invoice.id,
-        quantity: Faker::Number.within(range: 1..100),
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
-      )
-
-      InvoiceItem.create!(
-        item_id: item2.id,
-        invoice_id: invoice.id,
-        quantity: Faker::Number.within(range: 1..100),
-        unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
-      )
+      create(:invoice_item, item_id: item1.id, invoice_id: invoice.id)
+      create(:invoice_item, item_id: item2.id, invoice_id: invoice.id)
 
       expect(Invoice.count).to eq(1)
       expect(Invoice.first.items.count).to eq(2)

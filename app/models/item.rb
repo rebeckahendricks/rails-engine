@@ -19,8 +19,26 @@ class Item < ApplicationRecord
       .order(:name)
   end
 
-  def self.search_by_price(min_price = 0, max_price = Float::INFINITY)
-    where('unit_price >= ? and unit_price <= ?', min_price, max_price)
+  def self.search_by_price(min_price:, max_price:)
+    minimum = min_price_formatted(min_price)
+    maximum = max_price_formatted(max_price)
+    where('unit_price >= ? and unit_price <= ?', minimum, maximum)
       .order(:name)
+  end
+
+  def self.min_price_formatted(min_price)
+    if !min_price
+      0
+    else
+      min_price.to_i
+    end
+  end
+
+  def self.max_price_formatted(max_price)
+    if !max_price
+      Float::INFINITY
+    else
+      max_price.to_i
+    end
   end
 end
