@@ -37,6 +37,23 @@ RSpec.describe Item, type: :model do
       end
     end
 
+    describe 'find_by_price(search_params)' do
+      it 'can return (alphabetically) the first item within a minimum and/or maximum unit_price range' do
+        merchant = create(:merchant)
+        item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+        item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
+        item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
+        item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
+
+        min_price = 50.49
+        max_price = 150
+
+        expect(Item.find_by_price(min_price: min_price, max_price: nil)).to eq(item4)
+        expect(Item.find_by_price(min_price: nil, max_price: max_price)).to eq(item3)
+        expect(Item.find_by_price(min_price: min_price, max_price: max_price)).to eq(item2)
+      end
+    end
+
     describe 'find_all_by_price(search_params)' do
       it 'can return (alphabetically) all items within a minimum and/or maximum unit_price range' do
         merchant = create(:merchant)

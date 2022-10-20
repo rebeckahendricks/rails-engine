@@ -32,6 +32,14 @@ class Item < ApplicationRecord
       .order(Arel.sql('lower(items.name)'))
   end
 
+  def self.find_by_price(min_price:, max_price:)
+    minimum = min_price_formatted(min_price)
+    maximum = max_price_formatted(max_price)
+    where('unit_price >= ? and unit_price <= ?', minimum, maximum)
+      .order(Arel.sql('lower(items.name)'))
+      .first
+  end
+
   def self.min_price_formatted(min_price)
     if !min_price
       0
