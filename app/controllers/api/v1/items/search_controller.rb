@@ -14,6 +14,11 @@ class Api::V1::Items::SearchController < ApplicationController
     elsif params[:min_price] || params[:max_price]
       item = Item.find_by_price(min_price: params[:min_price], max_price: params[:max_price])
     end
-    render json: ItemSerializer.new(item)
+
+    if item
+      render json: ItemSerializer.new(item)
+    else
+      render json: ErrorSerializer.no_search_results
+    end
   end
 end
