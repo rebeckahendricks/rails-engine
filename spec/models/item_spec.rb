@@ -22,10 +22,11 @@ RSpec.describe Item, type: :model do
         item2 = create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
         create(:item, merchant_id: merchant.id, name: 'Buckle', description: 'Belt')
 
-        # expect(Item.search_by_name('ring')).to eq([item2, item1])
         expect(Item.search_by_name('ring')).to eq([item1])
       end
+    end
 
+    describe 'search_by_price(search_params)' do
       it 'can return (alphabetically) all items within a minimum and/or maximum unit_price range' do
         merchant = create(:merchant)
         item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
@@ -36,9 +37,9 @@ RSpec.describe Item, type: :model do
         min_price = 50
         max_price = 150
 
-        expect(Item.search_by_price(min_price)).to eq([item4, item2])
-        expect(Item.search_by_price(0, max_price)).to eq([item3, item1, item2])
-        expect(Item.search_by_price(min_price, max_price)).to eq([item2])
+        expect(Item.search_by_price(min_price: min_price, max_price: nil)).to eq([item4, item2])
+        expect(Item.search_by_price(min_price: nil, max_price: max_price)).to eq([item3, item1, item2])
+        expect(Item.search_by_price(min_price: min_price, max_price: max_price)).to eq([item2])
       end
     end
   end
@@ -54,26 +55,9 @@ RSpec.describe Item, type: :model do
         invoice1 = create(:invoice, customer_id: customer1.id, merchant_id: merchant.id)
         invoice2 = create(:invoice, customer_id: customer2.id, merchant_id: merchant.id)
 
-        InvoiceItem.create!(
-          item_id: item1.id,
-          invoice_id: invoice1.id,
-          quantity: Faker::Number.within(range: 1..100),
-          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
-        )
-
-        InvoiceItem.create!(
-          item_id: item1.id,
-          invoice_id: invoice2.id,
-          quantity: Faker::Number.within(range: 1..100),
-          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
-        )
-
-        InvoiceItem.create!(
-          item_id: item2.id,
-          invoice_id: invoice2.id,
-          quantity: Faker::Number.within(range: 1..100),
-          unit_price: Faker::Number.decimal(l_digits: 3, r_digits: 2) 
-        )
+        create(:invoice_item, item_id: item1.id, invoice_id: invoice1.id)
+        create(:invoice_item, item_id: item1.id, invoice_id: invoice2.id)
+        create(:invoice_item, item_id: item2.id, invoice_id: invoice2.id)
 
         expect(item1.invoice_items.count).to eq(2)
         expect(item2.invoice_items.count).to eq(1)
