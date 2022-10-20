@@ -16,21 +16,21 @@ class Item < ApplicationRecord
 
   def self.search_by_name(search_params)
     where('name ILIKE ?', "%#{search_params}%")
-      .order(:name)
+      .order(Arel.sql('lower(items.name)'))
   end
 
   def self.search_by_price(min_price:, max_price:)
     minimum = min_price_formatted(min_price)
     maximum = max_price_formatted(max_price)
     where('unit_price >= ? and unit_price <= ?', minimum, maximum)
-      .order(:name)
+      .order(Arel.sql('lower(items.name)'))
   end
 
   def self.min_price_formatted(min_price)
     if !min_price
       0
     else
-      min_price.to_i
+      min_price.to_f
     end
   end
 
@@ -38,7 +38,7 @@ class Item < ApplicationRecord
     if !max_price
       Float::INFINITY
     else
-      max_price.to_i
+      max_price.to_f
     end
   end
 end

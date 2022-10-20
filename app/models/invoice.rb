@@ -7,4 +7,3 @@ class Invoice < ApplicationRecord
   validates :customer_id, presence: true, numericality: true
   validates :status, presence: true
 end
-

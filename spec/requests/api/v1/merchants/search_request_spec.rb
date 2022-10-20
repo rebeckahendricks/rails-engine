@@ -4,7 +4,7 @@ describe 'Merchants::Search API' do
   describe 'happy path' do
     it 'can find one merchant from a name search' do
       create(:merchant, name: 'Walmart')
-      merchant1 = create(:merchant, name: 'Dogmart')
+      merchant1 = create(:merchant, name: 'dogmart')
       create(:merchant, name: 'Bobs Baskets')
 
       search = 'Mart'
@@ -26,7 +26,7 @@ describe 'Merchants::Search API' do
   describe 'sad path' do
     it 'returns an empty object with "data" if no results match' do
       create(:merchant, name: 'Walmart')
-      create(:merchant, name: 'Dogmart')
+      create(:merchant, name: 'dogmart')
       create(:merchant, name: 'Bobs Baskets')
 
       search = 'abcdefghijklmnop'

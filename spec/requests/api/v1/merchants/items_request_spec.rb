@@ -2,9 +2,8 @@ require 'rails_helper'
 
 describe 'Merchants::Items API' do
   it 'sends a list of items associated with a merchant' do
-    create_list(:merchant, 2)
-    merchant1 = Merchant.first
-    merchant2 = Merchant.last
+    merchant1 = create(:merchant)
+    merchant2 = create(:merchant)
 
     3.times do
       create(:item, merchant_id: merchant1.id)

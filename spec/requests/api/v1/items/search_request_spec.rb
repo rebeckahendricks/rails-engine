@@ -5,8 +5,8 @@ describe 'Items::Search API' do
     it 'can find all items (in alphabetical order) based on name search criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
-      item2 = create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
-      create(:item, merchant_id: merchant.id, name: 'Buckle', description: 'Belt')
+      create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
+      item2 = create(:item, merchant_id: merchant.id, name: 'gold earring', description: 'also pretty')
 
       search = 'ring'
 
@@ -16,18 +16,23 @@ describe 'Items::Search API' do
       expect(response).to have_http_status(200)
       search_results = JSON.parse(response.body, symbolize_names: true)
 
-      expect(search_results[:data].count).to eq(1)
+      expect(search_results[:data].count).to eq(2)
       expect(search_results[:data]).to be_an(Array)
 
-      expect(search_results[:data][0][:id].to_i).to eq(item1.id)
-      expect(search_results[:data][0][:attributes][:name]).to eq(item1.name)
-      expect(search_results[:data][0][:attributes][:description]).to eq(item1.description)
+      expect(search_results[:data][0][:id].to_i).to eq(item2.id)
+      expect(search_results[:data][1][:id].to_i).to eq(item1.id)
+
+      expect(search_results[:data][0][:attributes][:name]).to eq(item2.name)
+      expect(search_results[:data][1][:attributes][:name]).to eq(item1.name)
+
+      expect(search_results[:data][0][:attributes][:description]).to eq(item2.description)
+      expect(search_results[:data][1][:attributes][:description]).to eq(item1.description)
     end
 
     it 'can find all items (in alphabetical order) based on minimum price criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
-      item2 = create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
       item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
       item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
 
@@ -52,11 +57,11 @@ describe 'Items::Search API' do
     it 'can find all items (in alphabetical order) based on maximum price criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
-      item2 = create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
       item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
       item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
 
-      max_price = 150
+      max_price = 150.01
 
       get "/api/v1/items/find_all?max_price=#{max_price}"
 
@@ -79,11 +84,11 @@ describe 'Items::Search API' do
     it 'can find all items (in alphabetical order) based on minimum and maximum price criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
-      item2 = create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
       item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
       item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
 
-      min_price = 30
+      min_price = 30.99
       max_price = 150
 
       get "/api/v1/items/find_all?min_price=#{min_price}&max_price=#{max_price}"
@@ -126,7 +131,7 @@ describe 'Items::Search API' do
       create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
       create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
 
-      min_price = 50
+      min_price = 50.49
       max_price = 80
 
       get "/api/v1/items/find_all?min_price=#{min_price}&max_price=#{max_price}"
@@ -134,7 +139,7 @@ describe 'Items::Search API' do
       expect(response).to have_http_status(200)
     end
 
-    it 'cannot search for name and minimum price' do
+    it 'cannot search for both name and minimum price' do
       merchant = create(:merchant)
       create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
       create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
@@ -146,15 +151,28 @@ describe 'Items::Search API' do
       expect(response).to have_http_status(400)
     end
 
-    it 'cannot search for name and maximum price' do
+    it 'cannot search for both name and maximum price' do
       merchant = create(:merchant)
       create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
       create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
 
       search_name = 'Zebra'
-      max_price = 150
+      max_price = 150.99
 
       get "/api/v1/items/find_all?name=#{search_name}&max_price=#{max_price}"
+      expect(response).to have_http_status(400)
+    end
+
+    it 'cannot search for both name and minumum and maximum price' do
+      merchant = create(:merchant)
+      create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+      create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+
+      search_name = 'Zebra'
+      min_price = 50
+      max_price = 150.99
+
+      get "/api/v1/items/find_all?name=#{search_name}&min_price=#{min_price}&max_price=#{max_price}"
       expect(response).to have_http_status(400)
     end
 
