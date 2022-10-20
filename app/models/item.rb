@@ -14,12 +14,18 @@ class Item < ApplicationRecord
     end
   end
 
-  def self.search_by_name(search_params)
+  def self.find_by_name(search_params)
+    where('name ILIKE ?', "%#{search_params}%")
+      .order(Arel.sql('lower(items.name)'))
+      .first
+  end
+
+  def self.find_all_by_name(search_params)
     where('name ILIKE ?', "%#{search_params}%")
       .order(Arel.sql('lower(items.name)'))
   end
 
-  def self.search_by_price(min_price:, max_price:)
+  def self.find_all_by_price(min_price:, max_price:)
     minimum = min_price_formatted(min_price)
     maximum = max_price_formatted(max_price)
     where('unit_price >= ? and unit_price <= ?', minimum, maximum)

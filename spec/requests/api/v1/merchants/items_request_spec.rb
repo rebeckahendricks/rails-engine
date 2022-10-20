@@ -38,4 +38,3 @@ describe 'Merchants::Items API' do
     end
   end
 end
-

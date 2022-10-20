@@ -2,6 +2,25 @@ require 'rails_helper'
 
 describe 'Items::Search API' do
   describe 'happy path' do
+    it 'can find the first item (in alphabetical order) based on name search criteria' do
+      merchant = create(:merchant)
+      create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
+      create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
+      item = create(:item, merchant_id: merchant.id, name: 'gold earring', description: 'also pretty')
+
+      search = 'ring'
+
+      get "/api/v1/items/find?name=#{search}"
+
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      search_results = JSON.parse(response.body, symbolize_names: true)
+
+      expect(search_results[:data][:id].to_i).to eq(item.id)
+      expect(search_results[:data][:attributes][:name]).to eq(item.name)
+      expect(search_results[:data][:attributes][:description]).to eq(item.description)
+    end
+
     it 'can find all items (in alphabetical order) based on name search criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
