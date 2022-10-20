@@ -11,10 +11,14 @@ class Merchant < ApplicationRecord
     merchant_id.nil? || where(id: merchant_id).any?
   end
 
-  def self.search_by_name(search_params)
+  def self.find_by_name(search_params)
     where('name ILIKE ?', "%#{search_params}%")
       .order(Arel.sql('lower(name)'))
-      .limit(1)
       .first
+  end
+
+  def self.find_all_by_name(search_params)
+    where('name ILIKE ?', "%#{search_params}%")
+      .order(Arel.sql('lower(name)'))
   end
 end

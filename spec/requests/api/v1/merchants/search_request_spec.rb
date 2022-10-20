@@ -40,4 +40,24 @@ describe 'Merchants::Search API' do
       expect(merchant[:data].count).to eq(0)
     end
   end
+
+  describe 'happy path' do
+    it 'can return all merchants that match a name search' do
+      merchant1 = create(:merchant, name: 'Walmart')
+      merchant2 = create(:merchant, name: 'dogmart')
+      create(:merchant, name: 'Bobs Baskets')
+
+      search = 'Mart'
+
+      get "/api/v1/merchants/find_all?name=#{search}"
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to be_successful
+      expect(merchant[:data].count).to eq(2)
+
+      expect(merchant[:data][0][:attributes][:name]).to eq(merchant2.name)
+      expect(merchant[:data][1][:attributes][:name]).to eq(merchant1.name)
+    end
+  end
 end
