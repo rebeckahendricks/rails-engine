@@ -1,5 +1,5 @@
 class Api::V1::Items::SearchController < ApplicationController
-  def show
+  def index
     if params[:name]
       items = Item.search_by_name(params[:name])
     elsif params[:min_price] || params[:max_price]

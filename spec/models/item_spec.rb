@@ -16,13 +16,13 @@ RSpec.describe Item, type: :model do
 
   describe '.class methods' do
     describe '.search_by_name(search_params)' do
-      it 'can return (alphabetically) all items with search params in its name and description' do
+      it 'can return (alphabetically) all items with search params in its name' do
         merchant = create(:merchant)
         item1 = create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
-        item2 = create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
-        create(:item, merchant_id: merchant.id, name: 'Buckle', description: 'Belt')
+        create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
+        item3 = create(:item, merchant_id: merchant.id, name: 'bronze ring', description: 'also pretty')
 
-        expect(Item.search_by_name('ring')).to eq([item1])
+        expect(Item.search_by_name('ring')).to eq([item3, item1])
       end
     end
 
@@ -30,11 +30,11 @@ RSpec.describe Item, type: :model do
       it 'can return (alphabetically) all items within a minimum and/or maximum unit_price range' do
         merchant = create(:merchant)
         item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
-        item2 = create(:item, merchant_id: merchant.id, name: 'Zebra', unit_price: 99.99)
+        item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
         item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
         item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
 
-        min_price = 50
+        min_price = 50.49
         max_price = 150
 
         expect(Item.search_by_price(min_price: min_price, max_price: nil)).to eq([item4, item2])

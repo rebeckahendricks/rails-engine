@@ -13,7 +13,7 @@ class Merchant < ApplicationRecord
 
   def self.search_by_name(search_params)
     where('name ILIKE ?', "%#{search_params}%")
-      .order(:name)
+      .order(Arel.sql('lower(name)'))
       .limit(1)
       .first
   end

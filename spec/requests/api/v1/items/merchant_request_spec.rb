@@ -2,9 +2,8 @@ require 'rails_helper'
 
 describe 'Items::Merchant API' do
   it 'can get one merchant by its items' do
-    create_list(:merchant, 2)
-    merchant1 = Merchant.first
-    merchant2 = Merchant.last
+    merchant1 = create(:merchant)
+    merchant2 = create(:merchant)
 
     item1 = create(:item, merchant_id: merchant1.id)
     create(:item, merchant_id: merchant2.id)
