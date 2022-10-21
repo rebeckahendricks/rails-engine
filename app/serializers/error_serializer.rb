@@ -20,4 +20,18 @@ class ErrorSerializer
       "data": {}
     }
   end
+
+  def self.no_search_input_error
+    {
+      "message": 'Your query could not be completed',
+      "error": 'Search input cannot be empty'
+    }
+  end
+
+  def self.min_max_price_error
+    {
+      "message": 'Your query could not be completed',
+      "error": 'Minimum price must be less than maximum price'
+    }
+  end
 end

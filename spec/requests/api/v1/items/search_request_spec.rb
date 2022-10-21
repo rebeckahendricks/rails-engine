@@ -1,7 +1,28 @@
 require 'rails_helper'
 
 describe 'Items::Search API' do
-  describe 'happy path' do
+  describe 'find one' do
+    it 'can find the first item (in alphabetical order) based on name search criteria' do
+      merchant = create(:merchant)
+      create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
+      create(:item, merchant_id: merchant.id, name: 'Chime', description: 'This silver chime will bring you cheer!')
+      item = create(:item, merchant_id: merchant.id, name: 'gold earring', description: 'also pretty')
+
+      search = 'ring'
+
+      get "/api/v1/items/find?name=#{search}"
+
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      search_results = JSON.parse(response.body, symbolize_names: true)
+
+      expect(search_results[:data][:id].to_i).to eq(item.id)
+      expect(search_results[:data][:attributes][:name]).to eq(item.name)
+      expect(search_results[:data][:attributes][:description]).to eq(item.description)
+    end
+  end
+
+  describe 'find all by name - happy path' do
     it 'can find all items (in alphabetical order) based on name search criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Titanium Ring', description: 'Pretty')
@@ -28,7 +49,66 @@ describe 'Items::Search API' do
       expect(search_results[:data][0][:attributes][:description]).to eq(item2.description)
       expect(search_results[:data][1][:attributes][:description]).to eq(item1.description)
     end
+  end
 
+  describe 'find one by price' do
+    it 'can find the first item (in alphabetical order) based on minimum price criteria' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
+      item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
+      item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
+
+      min_price = 50
+
+      get "/api/v1/items/find?min_price=#{min_price}"
+
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      search_result = JSON.parse(response.body, symbolize_names: true)
+
+      expect(search_result[:data][:id].to_i).to eq(item4.id)
+    end
+
+    it 'can find the first item (in alphabetical order) based on maximum price criteria' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
+      item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
+      item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
+
+      max_price = 150.01
+
+      get "/api/v1/items/find?max_price=#{max_price}"
+
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      search_result = JSON.parse(response.body, symbolize_names: true)
+
+      expect(search_result[:data][:id].to_i).to eq(item3.id)
+    end
+
+    it 'can find the first item (in alphabetical order) based on minimum & maximum price criteria' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
+      item2 = create(:item, merchant_id: merchant.id, name: 'zebra', unit_price: 99.99)
+      item3 = create(:item, merchant_id: merchant.id, name: 'Apple', unit_price: 35.99)
+      item4 = create(:item, merchant_id: merchant.id, name: 'Elephant', unit_price: 599.99)
+
+      min_price = 30.99
+      max_price = 150
+
+      get "/api/v1/items/find?min_price=#{min_price}&max_price=#{max_price}"
+
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      search_result = JSON.parse(response.body, symbolize_names: true)
+
+      expect(search_result[:data][:id].to_i).to eq(item3.id)
+    end
+  end
+
+  describe 'find all by price - happy path' do
     it 'can find all items (in alphabetical order) based on minimum price criteria' do
       merchant = create(:merchant)
       item1 = create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)
@@ -108,7 +188,7 @@ describe 'Items::Search API' do
     end
   end
 
-  describe 'sad path' do
+  describe 'find all by price - sad path' do
     it 'returns an array if there are no items found based on search criteria' do
       merchant = create(:merchant)
       create(:item, merchant_id: merchant.id, name: 'Ball', unit_price: 1.99)

@@ -16,14 +16,16 @@ RSpec.describe Merchant, type: :model do
   describe 'class methods' do
     describe '.good_id?' do
       it 'can determine if a merchant id exists or is not nil' do
-        merchant_id = create(:merchant).id
+        merchant1 = create(:merchant)
+        merchant2 = create(:merchant)
+        merchant2.destroy
 
-        expect(Merchant.good_id?(merchant_id)).to be(true)
-        expect(Merchant.good_id?(5)).to be(false)
+        expect(Merchant.good_id?(merchant1.id)).to be(true)
+        expect(Merchant.good_id?(merchant2.id)).to be(false)
       end
     end
 
-    describe '.search_by_name(search_params)' do
+    describe '.find_by_name(search_params)' do
       it 'can search for a merchant by name' do
         create(:merchant, name: 'Walmart')
         merchant = create(:merchant, name: 'dogmart')
@@ -31,7 +33,19 @@ RSpec.describe Merchant, type: :model do
 
         search_params = 'Mart'
 
-        expect(Merchant.search_by_name(search_params)).to eq(merchant)
+        expect(Merchant.find_by_name(search_params)).to eq(merchant)
+      end
+    end
+
+    describe '.find_all_by_name(search_params)' do
+      it 'can search for a merchant by name' do
+        merchant1 = create(:merchant, name: 'Walmart')
+        merchant2 = create(:merchant, name: 'dogmart')
+        create(:merchant, name: 'Bobs Baskets')
+
+        search_params = 'Mart'
+
+        expect(Merchant.find_all_by_name(search_params)).to eq([merchant2, merchant1])
       end
     end
   end
